@@ -32,7 +32,7 @@ const NavItem = ({ mobile }) => {
   return (
     <ul className={`text-md justify-center w-full flex gap-4 ${mobile && 'flex-col bg-gray-900 h-full'} items-center`}>
       {/* 🔧 관리자용 메뉴 추가 */}
-      {isAuth && userRole === 1 && (
+      {isAuth && userRole === 'admin' && (
         <li className="py-2 text-center border-b-4 cursor-pointer">
           <Link to="/admin/add-product" className="text-white hover:text-yellow-300">
             상품 추가

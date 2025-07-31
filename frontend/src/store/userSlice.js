@@ -6,7 +6,7 @@ const initialState = {
     id: '',
     email: '',
     name: '',
-    role: 0,
+    role: 'user',
     image: '',
   },
   isAuth: false,
@@ -29,13 +29,7 @@ const userSlice = createSlice({
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.isLoading = false;
-
-        // ✅ 관리자 role 강제 적용 (role: 1) 가짜코드~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        state.userData = {
-          ...action.payload.user,
-          role: 1,
-        };
-        //state.userData = action.payload.user; // 응답에서 user 정보를 저장 원래코드~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        state.userData = action.payload.user;
         state.isAuth = true;
       })
       .addCase(loginUser.rejected, (state, action) => {

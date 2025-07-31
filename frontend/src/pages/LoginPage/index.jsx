@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 import { loginUser } from '../../store/thunkFunctions';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; // ✅ 추가
 import { AiOutlineEye } from 'react-icons/ai';
 
 const LoginPage = () => {
@@ -14,15 +14,24 @@ const LoginPage = () => {
   } = useForm({ mode: 'onChange' });
 
   const dispatch = useDispatch();
+  const navigate = useNavigate(); // ✅ 추가
   const [showPassword, setShowPassword] = useState(false);
 
-  const onSubmit = ({ email, password }) => {
-    const body = {
-      email,
-      password,
-    };
-    dispatch(loginUser(body));
-    reset();
+  // ✅ 로그인 처리 응답 확인 로직 추가
+  const onSubmit = async ({ username, password }) => {
+    const body = { username, password };
+
+    try {
+      const res = await dispatch(loginUser(body)).unwrap(); // ✅ 응답 처리
+
+      alert(`${res.user.name}님 환영합니다!`); // ✅ 성공 알림
+      navigate('/'); // ✅ 메인 페이지 이동
+    } catch (error) {
+      console.error('❌ 로그인 오류:', error); // ✅ 콘솔 확인용
+      alert(error.error || '로그인에 실패했습니다.'); // ✅ 실패 알림
+    }
+
+    reset(); // ✅ 폼 초기화
   };
 
   return (
@@ -33,15 +42,15 @@ const LoginPage = () => {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* 아이디 입력 */}
           <div>
-            <label htmlFor="email" className="text-sm text-black-900 block mb-1">아이디</label>
+            <label htmlFor="username" className="text-sm text-black-900 block mb-1">아이디</label>
             <input
-              id="email"
-              type="email"
+              id="username"
+              type="text"
               placeholder="아이디 입력"
               className="w-full border-b border-gray-300 focus:outline-none py-2 px-1 bg-transparent"
-              {...register('email', { required: '필수 필드입니다.' })}
+              {...register('username', { required: '필수 필드입니다.' })}
             />
-            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
+            {errors.username && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
           </div>
 
           {/* 비밀번호 입력 */}

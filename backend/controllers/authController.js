@@ -3,13 +3,13 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const login = async (req, res) => {
-  const { email, password } = req.body;
+  const { username, password } = req.body; // 🔴 수정된 부분: email → username
 
   try {
-    const [rows] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
+    const [rows] = await db.query('SELECT * FROM users WHERE name = ?', [username]); // 🔴 수정된 부분
 
     if (rows.length === 0) {
-      return res.status(401).json({ error: '존재하지 않는 이메일입니다.' });
+      return res.status(401).json({ error: '존재하지 않는 아이디입니다.' }); // 🔴 수정된 부분
     }
 
     const user = rows[0];
@@ -19,9 +19,15 @@ const login = async (req, res) => {
       return res.status(401).json({ error: '비밀번호가 일치하지 않습니다.' });
     }
 
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      console.error('❌ JWT_SECRET이 .env에 설정되지 않았습니다.');
+      return res.status(500).json({ error: '서버 설정 오류 (JWT 시크릿 없음)' });
+    }
+
     const token = jwt.sign(
-      { id: user.id, email: user.email },
-      process.env.JWT_SECRET,
+      { id: user.id, name: user.name, role: user.role }, // 🔴 수정된 부분: email → name
+      secret,
       { expiresIn: '1d' }
     );
 
@@ -32,6 +38,7 @@ const login = async (req, res) => {
         id: user.id,
         email: user.email,
         name: user.name,
+        role: user.role
       },
     });
   } catch (err) {
@@ -59,7 +66,7 @@ const register = async (req, res) => {
 };
 
 const logout = async (req, res) => {
-  // 로그아웃 로직
+  return res.status(200).json({ message: '로그아웃 처리 완료 (서버에서 별도 작업 없음)' });
 };
 
 module.exports = {
