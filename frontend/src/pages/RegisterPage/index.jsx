@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; // 📌 추가
+import axios from 'axios'; // 📌 추가
 
 const RegisterPage = () => {
+  const navigate = useNavigate(); // 📌 추가
+
   const [form, setForm] = useState({
     username: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    //confirmPassword: '' 
   });
 
   const handleChange = (e) => {
@@ -14,7 +17,7 @@ const RegisterPage = () => {
     setForm({ ...form, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (form.password !== form.confirmPassword) {
@@ -22,8 +25,20 @@ const RegisterPage = () => {
       return;
     }
 
-    // 서버 요청 등 처리
-    console.log('회원가입 요청', form);
+    try {
+      const response = await axios.post('/api/auth/register', {
+        username: form.username,
+        email: form.email,
+        password: form.password,
+      }); // 📌 백엔드로 실제 요청 전송
+
+      console.log('✅ 회원가입 성공:', response.data);
+      alert('회원가입이 완료되었습니다.');
+      navigate('/login'); // 📌 성공 시 로그인 페이지로 이동
+    } catch (err) {
+      console.error('❌ 회원가입 실패:', err.response?.data || err.message);
+      alert('회원가입 실패: ' + (err.response?.data?.error || '서버 오류'));
+    }
   };
 
   return (
@@ -105,4 +120,4 @@ const RegisterPage = () => {
   );
 };
 
-export default RegisterPage
+export default RegisterPage;

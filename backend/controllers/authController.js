@@ -42,13 +42,13 @@ const login = async (req, res) => {
 
 const register = async (req, res) => {
   try {
-    const { email, password, name } = req.body;
+    const { email, password, username } = req.body;
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
     await db.query(
       'INSERT INTO users (email, password, name, role) VALUES (?, ?, ?, ?)',
-      [email, hashedPassword, name, 'user']
+      [email, hashedPassword, username, 'user']
     );
 
     return res.status(201).json({ message: '회원가입 성공' });
