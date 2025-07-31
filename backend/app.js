@@ -10,7 +10,7 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 
 // ✅ DB 테이블 초기화 (한 번만 실행됨)
-require('./init/initUsersDB');
+require('./init/initProductsDB');
 
 // 미들웨어
 app.use(cors());
