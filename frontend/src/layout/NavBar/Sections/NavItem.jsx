@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { resetUser } from '../../../store/userSlice';
 import { logoutUser } from './../../../store/thunkFunctions';
- // 💡 수동 초기화 액션
 
 const routes = [
   { to: '/login', name: '로그인', auth: false },
@@ -13,6 +12,7 @@ const routes = [
 
 const NavItem = ({ mobile }) => {
   const isAuth = useSelector((state) => state.user?.isAuth);
+  const userRole = useSelector((state) => state.user?.userData?.role); // 🔧 관리자 권한 확인
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -21,8 +21,8 @@ const NavItem = ({ mobile }) => {
       const res = await dispatch(logoutUser());
 
       if (res?.meta?.requestStatus === 'fulfilled') {
-        dispatch(resetUser());         // ✅ 리덕스 상태 초기화
-        navigate('/');                // ✅ 홈으로 이동
+        dispatch(resetUser());
+        navigate('/');
       }
     } catch (err) {
       console.error('로그아웃 실패:', err);
@@ -31,6 +31,15 @@ const NavItem = ({ mobile }) => {
 
   return (
     <ul className={`text-md justify-center w-full flex gap-4 ${mobile && 'flex-col bg-gray-900 h-full'} items-center`}>
+      {/* 🔧 관리자용 메뉴 추가 */}
+      {isAuth && userRole === 1 && (
+        <li className="py-2 text-center border-b-4 cursor-pointer">
+          <Link to="/admin/add-product" className="text-white hover:text-yellow-300">
+            상품 추가
+          </Link>
+        </li>
+      )}
+
       {routes.map(({ to, name, auth }) => {
         if (isAuth !== auth) return null;
 
