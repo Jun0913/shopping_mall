@@ -1,4 +1,8 @@
 // backend/config/db.js
+require('dotenv').config({ path: '../.env' }); // env파일 읽어오기
+
+
+// backend/config/db.js
 const mysql = require('mysql2/promise');
 
 const db = mysql.createPool({
@@ -24,3 +28,7 @@ async function verifyDBConnection() {
 verifyDBConnection();
 
 module.exports = db;
+
+// backend/config/db.js 확인용 
+console.log('🧪 DB_HOST:', process.env.DB_HOST);
+console.log('🧪 DB_PORT:', process.env.DB_PORT);

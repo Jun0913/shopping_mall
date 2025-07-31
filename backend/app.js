@@ -3,6 +3,8 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const path = require('path');
+const usersRouter = require('./routes/users');
+const adminRouter = require('./routes/admin');
 
 // .env 파일 로드
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
@@ -15,8 +17,11 @@ require('./init/initUsersDB');
 // 미들웨어
 app.use(cors());
 app.use(express.json());
+app.use('/api/users', usersRouter);
+app.use('/api/admin', adminRouter);
 
 // 서버 시작
 app.listen(PORT, () => {
   console.log(`🚀 서버 실행 중: http://localhost:${PORT}`);
 });
+
