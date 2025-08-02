@@ -1,6 +1,6 @@
 // backend/config/db.js
-require('dotenv').config({ path: '../.env' }); // env파일 읽어오기
-
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../../.env') }); // env파일 읽어오기
 
 // backend/config/db.js
 const mysql = require('mysql2/promise');
