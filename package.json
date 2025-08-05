@@ -1,0 +1,14 @@
+{
+  "name": "shopping_mall",
+  "version": "1.0.0",
+  "devDependencies": {
+    "concurrently": "^9.2.0",
+    "nodemon": "^3.1.10",
+    "vite": "^7.0.6"
+  },
+  "scripts": {
+    "dev": "concurrently \"npm run dev:client\" \"npm run dev:server\"",
+    "dev:client": "cd frontend && npx vite",
+    "dev:server": "cd backend && npx nodemon app.js"
+  }
+}
