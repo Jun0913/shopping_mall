@@ -1,32 +1,31 @@
-const db = require('../config/db');  // DB 연결
+const db = require('../config/db');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const login = async (req, res) => {
-  const { username, password } = req.body; // 🔴 수정된 부분: email → username
+  // body: { id, password }로 받되, 기존 username도 허용
+  const { id, username, password } = req.body;
+  const loginId = id ?? username;
 
   try {
-    const [rows] = await db.query('SELECT * FROM users WHERE name = ?', [username]); // 🔴 수정된 부분
-
+    const [rows] = await db.query('SELECT * FROM users WHERE id = ?', [loginId]);
     if (rows.length === 0) {
-      return res.status(401).json({ error: '존재하지 않는 아이디입니다.' }); // 🔴 수정된 부분
+      return res.status(401).json({ error: '존재하지 않는 아이디입니다.' });
     }
 
     const user = rows[0];
-
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ error: '비밀번호가 일치하지 않습니다.' });
     }
 
     const secret = process.env.JWT_SECRET;
-    if (!secret) {
-      console.error('❌ JWT_SECRET이 .env에 설정되지 않았습니다.');
-      return res.status(500).json({ error: '서버 설정 오류 (JWT 시크릿 없음)' });
-    }
-
     const token = jwt.sign(
-      { id: user.id, name: user.name, role: user.role }, // 🔴 수정된 부분: email → name
+      {
+        uid: user.list,   // PK (숫자, 예: 1,2,3…)
+        id: user.id,      // 로그인 아이디(문자열)
+        role: user.role,
+      },
       secret,
       { expiresIn: '1d' }
     );
@@ -35,10 +34,12 @@ const login = async (req, res) => {
       message: '로그인 성공',
       token,
       user: {
+        uid: user.list,
         id: user.id,
         email: user.email,
-        name: user.name,
-        role: user.role
+        role: user.role,
+        created_at: user.created_at,
+        updated_at: user.updated_at,
       },
     });
   } catch (err) {
@@ -49,28 +50,24 @@ const login = async (req, res) => {
 
 const register = async (req, res) => {
   try {
-    const { email, password, username } = req.body;
-
+    // body: { email, password, id } (id = 로그인 아이디)
+    const { email, password, id } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
 
     await db.query(
-      'INSERT INTO users (email, password, name, role) VALUES (?, ?, ?, ?)',
-      [email, hashedPassword, username, 'user']
+      'INSERT INTO users (email, password, id, role) VALUES (?, ?, ?, ?)',
+      [email, hashedPassword, id, 'user']
     );
 
     return res.status(201).json({ message: '회원가입 성공' });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: '회원가입 중 오류 발생' });
+    return res.status(500).json({ error: '회원가입 중 오류 발생', details: error.message });
   }
 };
 
-const logout = async (req, res) => {
+const logout = async (_req, res) => {
   return res.status(200).json({ message: '로그아웃 처리 완료 (서버에서 별도 작업 없음)' });
 };
 
-module.exports = {
-  login,
-  register,
-  logout,
-};
+module.exports = { login, register, logout };
